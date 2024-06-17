@@ -14,7 +14,7 @@ COPY cmd ./cmd/
 WORKDIR /app/cmd
 
 # Build the binary.
-RUN go build -v -o ../../server
+RUN go build -v -o ../server
 
 
 FROM scratch
