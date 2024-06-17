@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.23-alpine as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -9,14 +9,9 @@ WORKDIR /app
 COPY go.* ./
 RUN go mod download
 COPY cmd ./cmd/
-COPY pkg ./pkg/
-COPY static ./static/
-COPY templates ./templates/
 
-## get ca certs
-RUN apk update && apk add --no-cache git ca-certificates && update-ca-certificates
 
-WORKDIR /app/cmd/web
+WORKDIR /app/cmd
 
 # Build the binary.
 RUN go build -v -o ../../server
@@ -26,15 +21,11 @@ FROM scratch
 
 #the app cant find templates etc unless we set the pwd
 WORKDIR /app
-#instll certs so we can talk to the db
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
 
 # Copy the binary and files to the production image from the builder stage.
 COPY --from=builder /app/server /app/server
 
-COPY --from=builder /app/templates /app/templates/
-
-COPY --from=builder /app/static /app/static/
 
 EXPOSE 8080
 
